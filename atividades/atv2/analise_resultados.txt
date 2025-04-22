@@ -1,0 +1,5 @@
+Análise dos Resultados
+======================
+Média dos Tempos: 6.85185000000000000000 ms
+Desvio Padrão: .965 ms
+Número de Execuções: 20
