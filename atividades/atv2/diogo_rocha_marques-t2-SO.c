@@ -13,7 +13,7 @@ typedef struct node {
     struct node *pai;
 } Node;
 
-Node *criar_no (int dado, Node *pai) {
+Node *criar_no(int dado, Node *pai) {
     Node *novo = (Node *)malloc(sizeof(Node));
     novo->dado = dado;
     novo->esquerda = NULL;
@@ -32,7 +32,7 @@ void criar_processos_arvore(Node *raiz, int nivel_atual, int altura_maxima) {
     pid_t pid_esquerda = fork();
     pid_t pid_direita = fork();
 
-    if(pid_esquerda == 0) {
+    if (pid_esquerda == 0) {
         raiz->esquerda = criar_no(raiz->dado * 2, raiz);
         exibir_processo("ARVORE");
         criar_processos_arvore(raiz->esquerda, nivel_atual + 1, altura_maxima);
@@ -42,7 +42,7 @@ void criar_processos_arvore(Node *raiz, int nivel_atual, int altura_maxima) {
 
     if (pid_direita == 0) {
         raiz->direita = criar_no(raiz->dado * 2 + 1, raiz);
-        exibir_processo("ÁRVORE");
+        exibir_processo("ARVORE");
         criar_processos_arvore(raiz->direita, nivel_atual + 1, altura_maxima);
         printf("[ÁRVORE] Processo %d finalizado.\n", getpid());
         exit(0);
@@ -72,15 +72,33 @@ double calcular_tempo_ms(struct timespec inicio, struct timespec fim) {
     return (fim.tv_sec - inicio.tv_sec) * 1000.0 + (fim.tv_nsec - inicio.tv_nsec) / 1e6;
 }
 
+void medir_tempo_arvore(Node *raiz_arvore, int altura) {
+    struct timespec inicio_arvore, fim_arvore;
+    clock_gettime(CLOCK_MONOTONIC, &inicio_arvore); //nesta linha o vscode trata o parametro CLOCK_MONOTONIC como erro mas dando um cntrl + click na biblioteca este parametro esta la 
+    criar_processos_arvore(raiz_arvore, 0, altura);
+    clock_gettime(CLOCK_MONOTONIC, &fim_arvore);
+    double tempo_arvore = calcular_tempo_ms(inicio_arvore, fim_arvore);
+    printf("Tempo total de criação da árvore: %.3f ms\n", tempo_arvore);
+}
+
+void medir_tempo_cadeia(Node *raiz_cadeia, int altura) {
+    struct timespec inicio_cadeia, fim_cadeia;
+    clock_gettime(CLOCK_MONOTONIC, &inicio_cadeia);
+    criar_processos_cadeia(raiz_cadeia, 0, altura);
+    clock_gettime(CLOCK_MONOTONIC, &fim_cadeia);
+    double tempo_cadeia = calcular_tempo_ms(inicio_cadeia, fim_cadeia);
+    printf("Tempo total de criação da cadeia: %.3f ms\n", tempo_cadeia);
+}
+
 int ler_altura(int argc, char *argv[]) {
     if (argc != 2) {
-        printf(stderr, "Uso: %s <altura>\n", argv[0]);
+        fprintf(stderr, "Uso: %s <altura>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
     int altura = atoi(argv[1]);
     if (altura <= 0 || altura > ALTURA_MAXIMA) {
-        printf(stderr, "Altura inválida. Use um valor entre 1 e %d.\n", ALTURA_MAXIMA);
+        fprintf(stderr, "Altura inválida. Use um valor entre 1 e %d.\n", ALTURA_MAXIMA);
         exit(EXIT_FAILURE);
     }
 
@@ -93,21 +111,13 @@ int main(int argc, char *argv[]) {
 
     printf("Altura da árvore: %d | Total de processos esperados: %d\n", altura, total_processos);
 
-    struct timespec inicio, fim;
-    clock_gettime(CLOCK_MONOTONIC, &inicio);
+    Node *raiz_arvore = criar_no(1, NULL);
+    Node *raiz_cadeia = criar_no(1, NULL);
 
-    Node *raiz = criar_no(1, NULL);
     exibir_processo("RAIZ");
 
-    // Chamada para a árvore ou cadeia
-    criar_processos_arvore(raiz, 0, altura);  // Para árvore
-    //criar_processos_cadeia(raiz, 0, altura);  // Para cadeia
-
-    clock_gettime(CLOCK_MONOTONIC, &fim);
-    double tempo_total = calcular_tempo_ms(inicio, fim);
-
-    // Exibindo o tempo no formato esperado para captura pelo script
-    printf("Tempo total de criação da árvore: %.3f ms\n", tempo_total);
+    medir_tempo_arvore(raiz_arvore, altura);
+    medir_tempo_cadeia(raiz_cadeia, altura);
 
     return 0;
 }

@@ -1,5 +1,8 @@
 Análise dos Resultados
 ======================
-Média dos Tempos: 6.85185000000000000000 ms
-Desvio Padrão: .965 ms
-Número de Execuções: 20
+Média dos Tempos Árvore: 4.16095000000000000000 ms
+Desvio Padrão Árvore: 3.541 ms
+Média dos Tempos Cadeia:  ms
+Desvio Padrão Cadeia:  ms
+Número de Execuções: 80
+Análise concluída. Resultados salvos em analise_resultados.txt
